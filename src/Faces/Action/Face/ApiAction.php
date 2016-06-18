@@ -108,10 +108,15 @@ class ApiAction extends AbstractAction {
 		$attachments = [];
 		foreach ($faces as $face) {
 			$attachments[] = [
-                'fallback' => 'This is a face.',
+                'fallback' => 'This is a face.', // @todo Change to something like "USER has sent a face."
 				'image_url' => $this->baseUrl() . $face->image()
 			];
 		}
+
+        // Pick a random face
+        if (count($faces) > 1) {
+            $attachments = $attachments[rand(0, count($faces) - 1)];
+        }
 
         $text = (count($faces) > 0) ? '[user] is feeling ' . $this->emotion() . '.' : 'Couldn\'t find a face for that emotion. Maybe you should create it yourself. Or go back to work. Thanks.';
         $responseType = (count($faces) > 0) ? 'in_channel' : 'ephemeral';
