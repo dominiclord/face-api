@@ -57,7 +57,7 @@
                         "layout": {
                             "structure": [
                                 { "columns": [ 1, 1 ] },
-                                { "columns": [ 1 ] }
+                                { "columns": [ 1, 1 ] }
                             ]
                         },
                         "title":{
@@ -67,7 +67,8 @@
                         "properties":[
                             "active",
                             "image",
-                            "tags"
+                            "tags",
+                            "filename"
                         ]
                     }
 
