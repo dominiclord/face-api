@@ -34,21 +34,21 @@ class ApiAction extends AbstractAction {
     private $userID;
     private $userName;
 
-	/**
-	 * Content returned to Slack
-	 */
-	private $results = [];
+    /**
+     * Content returned to Slack
+     */
+    private $results = [];
 
     private $hasResults;
 
-	/**
-	 * @param RequestInterface  $request  A PSR-7 compatible Request instance.
-	 * @param ResponseInterface $response A PSR-7 compatible Response instance.
-	 * @return ResponseInterface
-	 */
-	public function run(RequestInterface $request, ResponseInterface $response)
-	{
-		$params = $request->getParams();
+    /**
+     * @param RequestInterface  $request  A PSR-7 compatible Request instance.
+     * @param ResponseInterface $response A PSR-7 compatible Response instance.
+     * @return ResponseInterface
+     */
+    public function run(RequestInterface $request, ResponseInterface $response)
+    {
+        $params = $request->getParams();
         $tokens = isset($this->appConfig()->slack_permitted_tokens) ? $this->appConfig()->slack_permitted_tokens : [];
 
         $this->setMode('json');
@@ -67,11 +67,11 @@ class ApiAction extends AbstractAction {
             ->setUserId($params['user_id'])
             ->parse($params['text']);
 
-		return $response;
-	}
+        return $response;
+    }
 
     private function parse($string)
-	{
+    {
         $this->search($string);
         return $this;
     }
@@ -104,23 +104,23 @@ class ApiAction extends AbstractAction {
             ->convertFacesToSlackAttachments();
 
         return $this;
-	}
+    }
 
-	/**
-	 * Formatted faces.
-	 * @return [type] [description]
-	 */
-	private function convertFacesToSlackAttachments()
-	{
-		$faces = $this->faces();
-		$attachments = [];
+    /**
+     * Formatted faces.
+     * @return [type] [description]
+     */
+    private function convertFacesToSlackAttachments()
+    {
+        $faces = $this->faces();
+        $attachments = [];
 
-		foreach ($faces as $face) {
-			$attachments[] = [
+        foreach ($faces as $face) {
+            $attachments[] = [
                 'fallback' => $this->userName() . ' is feeling ' . $this->emotion(),
-				'image_url' => $this->baseUrl() . $face->image()
-			];
-		}
+                'image_url' => $this->baseUrl() . $face->image()
+            ];
+        }
 
         // Pick a random face
         if (count($faces) > 1) {
@@ -135,28 +135,28 @@ class ApiAction extends AbstractAction {
             ->setResponseType($responseType)
             ->setAttachments($attachments);
 
-		return $this;
-	}
+        return $this;
+    }
 
-	/**
+    /**
      * We return an empty 200 response to Slack since we make use of their delayed response concept
      * It allows us to not output the user's slash command in the channel
-	 * @return array
-	 */
-	public function results()
-	{
-        // $this->results;
-        // Send an asynchronous request.
-        $client = new \GuzzleHttp\Client();
-        $request = new \GuzzleHttp\Psr7\Request('POST', $this->responseUrl(), ['Content-Type' => 'application/json'], http_build_query($this->results));
-        $promise = $client->sendAsync($request)->then(function ($response) {
-            // echo 'I completed! ' . $response->getBody();
-        });
-        $promise->wait();
-
+     * @return array
+     */
+    public function results()
+    {
         $this->setSuccess(true);
-		return [];
-	}
+        return $this->results;
+        // Send an asynchronous request.
+        // $client = new \GuzzleHttp\Client();
+        // $request = new \GuzzleHttp\Psr7\Request('POST', $this->responseUrl(), ['Content-Type' => 'application/json'], http_build_query($this->results));
+        // $promise = $client->sendAsync($request)->then(function ($response) {
+        // });
+        // $promise->wait();
+
+        // $this->setSuccess(true);
+        // return [];
+    }
 
     /* Setters */
     public function setEmotion($emotion)
