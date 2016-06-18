@@ -8,8 +8,6 @@ Query the API with an emotion and a face you shall receive
 - Limit to user IDs
 - Look into not outputting `/face [emotion]` into Slack
 - Output face using filename property
-- Make filename property editable
-- Return a random face from search term instead of the same one
 - Add message to face
     + ex.: `/face emotion [Your message here]`
 - Help function

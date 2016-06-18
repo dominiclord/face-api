@@ -12,7 +12,8 @@
 		"php": ">=5.5.0",
 		"locomotivemtl/charcoal-admin": "dev-master",
 		"locomotivemtl/charcoal-app": "~0.2",
-		"mustache/mustache": "^2.10"
+		"mustache/mustache": "^2.10",
+        "guzzlehttp/guzzle": "^6.2"
 	},
 	"autoload": {
 		"psr-4": {

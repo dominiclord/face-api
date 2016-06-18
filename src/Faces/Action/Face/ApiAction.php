@@ -54,18 +54,18 @@ class ApiAction extends AbstractAction {
         $this->setMode('json');
 
         if (!isset($params['token']) || !in_array($params['token'], $tokens) ||
-           !isset($params['text']) || empty($params['text'])) {
-            $this->setSuccess(false);
-            $this->setResponseType('ephemeral');
-            $this->setText('Authentification error.');
+            !isset($params['text']) || empty($params['text'])) {
+            $this
+                ->setResponseType('ephemeral')
+                ->setText('Authentification error.');
             return $response;
         }
 
         $this
+            ->setResponseUrl($params['response_url'])
             ->setUserName($params['user_name'])
             ->setUserId($params['user_id'])
-            ->parse($params['text'])
-            ->setSuccess(true);
+            ->parse($params['text']);
 
 		return $response;
 	}
@@ -139,11 +139,23 @@ class ApiAction extends AbstractAction {
 	}
 
 	/**
-	* @return array
-	*/
+     * We return an empty 200 response to Slack since we make use of their delayed response concept
+     * It allows us to not output the user's slash command in the channel
+	 * @return array
+	 */
 	public function results()
 	{
-		return $this->results;
+        // $this->results;
+        // Send an asynchronous request.
+        $client = new \GuzzleHttp\Client();
+        $request = new \GuzzleHttp\Psr7\Request('POST', $this->responseUrl(), ['Content-Type' => 'application/json'], $this->results);
+        $promise = $client->sendAsync($request)->then(function ($response) {
+            // echo 'I completed! ' . $response->getBody();
+        });
+        $promise->wait();
+
+        $this->setSuccess(true);
+		return [];
 	}
 
     /* Setters */
@@ -184,10 +196,16 @@ class ApiAction extends AbstractAction {
         $this->userId = $userId;
         return $this;
     }
+    public function setResponseUrl($responseUrl)
+    {
+        $this->responseUrl = $responseUrl;
+        return $this;
+    }
 
     /* Getters */
     public function faces() { return $this->faces; }
     public function emotion() { return $this->emotion; }
     public function userName() { return $this->userName; }
     public function userId() { return $this->userId; }
+    public function responseUrl() { return $this->responseUrl; }
 }
