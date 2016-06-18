@@ -6,7 +6,6 @@ Query the API with an emotion and a face you shall receive
 ## Features to implement
 
 - Limit to user IDs
-- If no face found, return ephemereal message to user
 - Look into not outputting `/face [emotion]` into Slack
 - Output face using filename property
 - Make filename property editable

@@ -18,10 +18,20 @@ class ApiAction extends AbstractAction {
      */
     private $faces;
 
+    /**
+     * Text received from slack
+     */
+    private $text;
+
+    /**
+     * Emotiong extracted from text
+     */
+    private $emotion;
+
 	/**
-	 * Message returned to Slack
+	 * Content returned to Slack
 	 */
-	private $text;
+	private $results = [];
 
     private $hasResults;
 
@@ -40,6 +50,7 @@ class ApiAction extends AbstractAction {
         if (!isset($params['token']) || !in_array($params['token'], $tokens) ||
            !isset($params['text']) || empty($params['text'])) {
             $this->setSuccess(false);
+            $this->setResponseType('ephemeral');
             $this->setText('Authentification error.');
             return $response;
         }
@@ -65,6 +76,9 @@ class ApiAction extends AbstractAction {
         $faceTable = $faceProto->source()->table();
         $tagTable = $tagProto->source()->table();
         $keyword = htmlspecialchars_decode($keyword, ENT_QUOTES);
+
+        $this->setEmotion($keyword);
+
         $keyword = '%'.filter_var($keyword, FILTER_SANITIZE_STRING).'%';
 
         $q = '
@@ -75,10 +89,11 @@ class ApiAction extends AbstractAction {
             AND (' . $tagTable . '.name LIKE "' . $keyword . '")
             GROUP BY id';
 
-        $this->logger->debug($q);
-
         $faces = $loader->loadFromQuery($q);
-        $this->setFaces($faces);
+
+        $this
+            ->setFaces($faces)
+            ->convertFacesToSlackAttachments();
 
         return $this;
 	}
@@ -87,26 +102,26 @@ class ApiAction extends AbstractAction {
 	 * Formatted faces.
 	 * @return [type] [description]
 	 */
-	private function facesAsSlackAttachments()
+	private function convertFacesToSlackAttachments()
 	{
 		$faces = $this->faces();
-
-		if (!$faces) {
-			return [];
-		}
-
-		$out = [];
+		$attachments = [];
 		foreach ($faces as $face) {
-			$out[] = [
+			$attachments[] = [
                 'fallback' => 'This is a face.',
 				'image_url' => $this->baseUrl() . $face->image()
 			];
 		}
 
-        $text = (count($out) > 0) ? 'Your face.' : 'Couldn\'t find a face for that emotion. Maybe you should create it yourself. Or go back to work. Thanks.';
-        $this->setText($text);
+        $text = (count($faces) > 0) ? '[user] is feeling ' . $this->emotion() . '.' : 'Couldn\'t find a face for that emotion. Maybe you should create it yourself. Or go back to work. Thanks.';
+        $responseType = (count($faces) > 0) ? 'in_channel' : 'ephemeral';
 
-		return $out;
+        $this
+            ->setText($text)
+            ->setResponseType($responseType)
+            ->setAttachments($attachments);
+
+		return $this;
 	}
 
 	/**
@@ -114,25 +129,15 @@ class ApiAction extends AbstractAction {
 	*/
 	public function results()
 	{
-        $ret = [];
-        $responseType = 'ephemeral';
-
-        if ($this->success()) {
-            $attachments = $this->facesAsSlackAttachments();
-
-            if (count($attachments) > 0) {
-                $ret['attachments'] = $attachments;
-                $responseType = 'in_channel';
-            }
-        }
-
-        $ret['text'] = $this->text();
-        $ret['response_type'] = $responseType;
-
-		return $ret;
+		return $this->results;
 	}
 
     /* Setters */
+    public function setEmotion($emotion)
+    {
+        $this->emotion = $emotion;
+        return $this;
+    }
     public function setFaces($faces)
     {
         $this->faces = $faces;
@@ -140,12 +145,24 @@ class ApiAction extends AbstractAction {
     }
     public function setText($text)
     {
-        $this->text = $text;
+        $this->results['text'] = $text;
+        return $this;
+    }
+    public function setResponseType($responseType)
+    {
+        $this->results['response_type'] = $responseType;
+        return $this;
+    }
+    public function setAttachments($attachments)
+    {
+        if (!empty($attachments)) {
+            $this->results['attachments'] = $attachments;
+        }
         return $this;
     }
 
     /* Getters */
     public function faces() { return $this->faces; }
-    public function text() { return $this->text; }
+    public function emotion() { return $this->emotion; }
 
 }
