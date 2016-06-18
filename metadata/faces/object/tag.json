@@ -1,0 +1,107 @@
+{
+    "properties":{
+        "id": {
+            "type": "id",
+            "mode": "uuid"
+        },
+        "name":{
+            "type":"string",
+            "label":"Tag name"
+        }
+    },
+
+    "data": {},
+
+    "sources": {
+        "default": {
+            "type": "database",
+            "table": "faces_tags"
+        }
+    },
+    "default_source": "default",
+
+    "admin":{
+        "lists":{
+            "default":{
+                "properties":[
+                    "name"
+                ],
+                "list_actions": [{
+                    "label": "New tag",
+                    "ident": "create",
+                    "url": "object/edit?obj_type=faces/object/tag"
+                }]
+            }
+        },
+        "forms":{
+            "default":{
+                "l10n_mode":"loop_inputs",
+                "groups":{
+                    "info":{
+                        "layout": {
+                            "structure": [
+                                { "columns": [ 1 ] }
+                            ]
+                        },
+                        "title":{
+                            "fr":"Informations",
+                            "en":"Informations"
+                        },
+                        "properties":[
+                            "name"
+                        ]
+                    }
+
+                },
+                "sidebars":{
+                    "actions":{}
+                }
+            }
+        },
+        "default_form":"default",
+
+        "dashboards":{
+            "edit":{
+                "title":"Faces",
+                "layout": {
+                    "structure": [
+                        { "columns": [ 1 ] }
+                    ]
+                },
+                "widgets": {
+                    "form": {
+                        "type": "charcoal/admin/widget/objectForm",
+                        "form_ident": "default",
+                        "obj_type": "faces/object/tag"
+                    }
+                },
+                "sidemenu": {
+                    "widget_type": "faces/admin/widget/edit",
+                    "ident":"content"
+                }
+            },
+            "table":{
+                "title":"Faces",
+                "layout": {
+                    "structure": [
+                        { "columns": [ 1 ] }
+                    ]
+                },
+                "widgets": {
+                    "form": {
+                        "type": "charcoal/admin/widget/table",
+                        "collection_ident": "default",
+                        "obj_type": "faces/object/tag"
+                    }
+                },
+                "sidemenu": {
+                    "widget_type": "faces/admin/widget/collection",
+                    "ident":"content"
+                }
+            }
+        },
+        "default_create_dashboard": "edit",
+        "default_edit_dashboard": "edit",
+        "default_collection_dashboard": "table"
+    }
+}

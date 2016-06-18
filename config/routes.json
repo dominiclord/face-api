@@ -1,0 +1,22 @@
+{
+	"routes":{
+        "templates":{
+            "base": {
+                "route": "/",
+                "controller":"faces/template/base",
+                "template":"faces/template/base"
+            }
+        },
+		"actions":{
+			"api":{
+				"controller":"faces/action/face/api",
+				"methods":[ "GET", "POST" ]
+			}
+		}
+	},
+
+	"handlers":{
+		"defaults": {
+		}
+	}
+}

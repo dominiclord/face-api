@@ -1,0 +1,44 @@
+{
+    "admin": {
+        "header_menu":{
+            "items":{
+                "faces":{
+                    "active":true,
+                    "label":"Faces",
+                    "icon":"contents",
+                    "url":"object/collection?obj_type=faces/object/face",
+                    "has_children":false
+                },
+                "tags":{
+                    "active":true,
+                    "label":"Tags",
+                    "icon":"contents",
+                    "url":"object/collection?obj_type=faces/object/tag",
+                    "has_children":false
+                }
+            }
+        },
+        "sidemenu":{
+            "faces":{
+                "title":"Faces",
+                "links":{
+                    "faces/object/face":{
+                        "name":"Faces",
+                        "url":"object/collection?obj_type=faces/object/face"
+                    },
+                    "faces/object/tag":{
+                        "name":"Tags",
+                        "url":"object/collection?obj_type=faces/object/tag"
+                    }
+                }
+            }
+        },
+        "routes":{
+            "templates":{
+                "home": {
+                    "redirect": "admin/object/collection?obj_type=faces/object/face"
+                }
+            }
+        }
+    }
+}

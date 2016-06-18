@@ -1,0 +1,43 @@
+{
+	"dev_mode": true,
+	"URL":"/",
+
+	"project_name": "Face API",
+
+	"timezone": "America/Montreal",
+
+	"cache": {
+		"active":false
+	},
+
+	"modules":{
+		"charcoal/admin/admin":{}
+	},
+
+	"metadata": {
+		"paths": [
+			"metadata/",
+			"vendor/locomotivemtl/charcoal-admin/metadata/",
+			"vendor/locomotivemtl/charcoal-app/metadata/",
+			"vendor/locomotivemtl/charcoal-base/metadata/",
+			"vendor/locomotivemtl/charcoal-property/metadata/"
+		]
+	},
+
+	"view": {
+		"paths": [
+			"templates/",
+			"vendor/locomotivemtl/charcoal-admin/templates/",
+			"vendor/locomotivemtl/charcoal-app/templates/"
+		],
+		"default_controller":"faces/template/base",
+		"default_template":"faces/template/base",
+		"default_engine":"mustache"
+	},
+
+	"service_providers":{
+		"charcoal/model/service-provider/model":{},
+		"charcoal/admin/service-provider/admin":{},
+		"charcoal/ui/service-provider/ui":{}
+	}
+}

@@ -1,0 +1,126 @@
+{
+    "properties":{
+        "id": {
+            "type": "id",
+            "mode": "uuid"
+        },
+        "active": {
+          "type": "boolean"
+        },
+        "image":{
+            "type":"image",
+            "label":"Image",
+            "upload_path":"www/uploads/faces/"
+        },
+        "filename":{
+            "type":"string",
+            "label":"Filename"
+        },
+        "tags":{
+            "type":"object",
+            "obj_type":"faces/object/tag",
+            "label":"Tags",
+            "multiple":true
+        }
+    },
+
+    "data": {},
+
+    "sources": {
+        "default": {
+            "type": "database",
+            "table": "faces_faces"
+        }
+    },
+    "default_source": "default",
+
+    "admin":{
+        "lists":{
+            "default":{
+                "properties":[
+                    "active",
+                    "filename",
+                    "tags"
+                ],
+                "list_actions": [{
+                    "label": "New face",
+                    "ident": "create",
+                    "url": "object/edit?obj_type=faces/object/face"
+                }]
+            }
+        },
+        "forms":{
+            "default":{
+                "l10n_mode":"loop_inputs",
+                "groups":{
+                    "info":{
+                        "layout": {
+                            "structure": [
+                                { "columns": [ 1, 1 ] },
+                                { "columns": [ 1 ] }
+                            ]
+                        },
+                        "title":{
+                            "fr":"Informations",
+                            "en":"Informations"
+                        },
+                        "properties":[
+                            "active",
+                            "image",
+                            "tags"
+                        ]
+                    }
+
+                },
+                "sidebars":{
+                    "actions":{}
+                }
+            }
+        },
+        "default_form":"default",
+
+        "dashboards":{
+            "edit":{
+                "title":"Faces",
+                "layout": {
+                    "structure": [
+                        { "columns": [ 1 ] }
+                    ]
+                },
+                "widgets": {
+                    "form": {
+                        "type": "charcoal/admin/widget/objectForm",
+                        "form_ident": "default",
+                        "obj_type": "faces/object/face"
+                    }
+                },
+                "sidemenu": {
+                    "widget_type": "faces/admin/widget/edit",
+                    "ident":"content"
+                }
+            },
+            "table":{
+                "title":"Faces",
+                "layout": {
+                    "structure": [
+                        { "columns": [ 1 ] }
+                    ]
+                },
+                "widgets": {
+                    "form": {
+                        "type": "charcoal/admin/widget/table",
+                        "collection_ident": "default",
+                        "obj_type": "faces/object/face"
+                    }
+                },
+                "sidemenu": {
+                    "widget_type": "faces/admin/widget/collection",
+                    "ident":"content"
+                }
+            }
+        },
+        "default_create_dashboard": "edit",
+        "default_edit_dashboard": "edit",
+        "default_collection_dashboard": "table"
+    }
+}

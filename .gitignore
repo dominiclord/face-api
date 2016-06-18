@@ -1,0 +1,83 @@
+# Charcoal
+
+www/uploads/*
+!www/uploads/.gitkeep
+config/config.*.*
+!config/config.example.*
+!config/config.sample.*
+
+# Package Managers
+
+composer.phar
+vendor/
+node_modules/
+bower_components/
+
+# Development Tools
+
+www/browsersync.php
+
+# Logging
+
+*.log
+error_log
+logs/
+
+# Caches
+
+mustache_cache/
+tmp/
+
+# Macintosh
+# ------
+
+.DS_Store
+.AppleDouble
+.LSOverride
+
+# Icon must end with two \r
+Icon
+
+# Thumbnails
+._*
+
+# Files that might appear in the root of a volume
+.DocumentRevisions-V100
+.fseventsd
+.Spotlight-V100
+.TemporaryItems
+.Trashes
+.VolumeIcon.icns
+
+# Directories potentially created on remote AFP share
+.AppleDB
+.AppleDesktop
+Network Trash Folder
+Temporary Items
+.apdisk
+
+# Windows
+# -------
+
+# Windows image file caches
+Thumbs.db
+ehthumbs.db
+
+# Folder config file
+Desktop.ini
+
+# Recycle Bin used on file shares
+$RECYCLE.BIN/
+
+# Windows Installer files
+*.cab
+*.msi
+*.msm
+*.msp
+
+# Windows shortcuts
+*.lnk
+
+
+# Environment
+config/config.*.json
