@@ -24,9 +24,15 @@ class ApiAction extends AbstractAction {
     private $text;
 
     /**
-     * Emotiong extracted from text
+     * Emotion extracted from text
      */
     private $emotion;
+
+    /**
+     * User querying the API
+     */
+    private $userID;
+    private $userName;
 
 	/**
 	 * Content returned to Slack
@@ -43,7 +49,7 @@ class ApiAction extends AbstractAction {
 	public function run(RequestInterface $request, ResponseInterface $response)
 	{
 		$params = $request->getParams();
-        $tokens = isset($this->appConfig()->slack_tokens) ? $this->appConfig()->slack_tokens : [];
+        $tokens = isset($this->appConfig()->slack_permitted_tokens) ? $this->appConfig()->slack_permitted_tokens : [];
 
         $this->setMode('json');
 
@@ -56,6 +62,8 @@ class ApiAction extends AbstractAction {
         }
 
         $this
+            ->setUserName($params['user_name'])
+            ->setUserId($params['user_id'])
             ->parse($params['text'])
             ->setSuccess(true);
 
@@ -106,9 +114,10 @@ class ApiAction extends AbstractAction {
 	{
 		$faces = $this->faces();
 		$attachments = [];
+
 		foreach ($faces as $face) {
 			$attachments[] = [
-                'fallback' => 'This is a face.', // @todo Change to something like "USER has sent a face."
+                'fallback' => $this->userName() . ' is feeling ' . $this->emotion(),
 				'image_url' => $this->baseUrl() . $face->image()
 			];
 		}
@@ -118,7 +127,7 @@ class ApiAction extends AbstractAction {
             $attachments = $attachments[rand(0, count($faces) - 1)];
         }
 
-        $text = (count($faces) > 0) ? '[user] is feeling ' . $this->emotion() . '.' : 'Couldn\'t find a face for that emotion. Maybe you should create it yourself. Or go back to work. Thanks.';
+        $text = (count($faces) > 0) ? $this->userName() . ' is feeling ' . $this->emotion() . '.' : 'Couldn\'t find a face for that emotion. Maybe you should create it yourself. Or go back to work. Thanks.';
         $responseType = (count($faces) > 0) ? 'in_channel' : 'ephemeral';
 
         $this
@@ -165,9 +174,20 @@ class ApiAction extends AbstractAction {
         }
         return $this;
     }
+    public function setUserName($userName)
+    {
+        $this->userName = $userName;
+        return $this;
+    }
+    public function setUserId($userId)
+    {
+        $this->userId = $userId;
+        return $this;
+    }
 
     /* Getters */
     public function faces() { return $this->faces; }
     public function emotion() { return $this->emotion; }
-
+    public function userName() { return $this->userName; }
+    public function userId() { return $this->userId; }
 }
