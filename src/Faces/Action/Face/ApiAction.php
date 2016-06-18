@@ -148,7 +148,7 @@ class ApiAction extends AbstractAction {
         // $this->results;
         // Send an asynchronous request.
         $client = new \GuzzleHttp\Client();
-        $request = new \GuzzleHttp\Psr7\Request('POST', $this->responseUrl(), ['Content-Type' => 'application/json'], $this->results);
+        $request = new \GuzzleHttp\Psr7\Request('POST', $this->responseUrl(), ['Content-Type' => 'application/json'], http_build_query($this->results));
         $promise = $client->sendAsync($request)->then(function ($response) {
             // echo 'I completed! ' . $response->getBody();
         });
