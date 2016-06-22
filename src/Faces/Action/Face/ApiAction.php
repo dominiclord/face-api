@@ -157,7 +157,7 @@ class ApiAction extends AbstractAction {
         // The image if the first match
         $imageUrl = (!empty($url[1])) ? $url[1] : '';
 
-        if (!empty($tagArray) && !empty($imageUrl)) {
+        if (!empty($tagArray) && !empty($imageUrl) && 1 !== 1) {
             $tagIds = [];
             // Try to load the tags
             foreach ($tagArray as $tagString) {
@@ -209,6 +209,7 @@ class ApiAction extends AbstractAction {
             // Create and save the model
             $faceModel->setData([
                 'active' => true,
+                'image' => $imgRawData,
                 'filename' => $originalName,
                 'tags' => $tagIds
             ]);
@@ -216,8 +217,6 @@ class ApiAction extends AbstractAction {
             $faceModel->save();
 
             unlink($tempName);
-
-            die();
         } else {
             $this
                 ->setResponseType('ephemeral')
