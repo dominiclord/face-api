@@ -149,11 +149,11 @@ class ApiAction extends AbstractAction {
     {
         $text = '
         Available commands\n
-        `/face help` --> *Outputs only to you a list of commands*\n
-        `/face _emotion_` --> *Sends a face to everyone with the related _emotion_*\n
-        `/face _emotion_ [_Your message here_]` --> *Sends a face to everyone with the related _emotion_ and a customised message to go with it*\n\n
-        `/face list` --> *Outputs only to you a list of available emotions*\n
-        `/face list _emotion_` --> *Outputs only to you a count of faces related to the queried emotion*\n
+        `/face help` Outputs only to you a list of commands
+        `/face _emotion_` Sends a face to everyone with the related _emotion_
+        `/face _emotion_ [_Your message here_]` Sends a face to everyone with the related _emotion_ and a customised message to go with it
+        `/face list` Outputs only to you a list of available emotions
+        `/face list _emotion_` Outputs only to you a count of faces related to the queried emotion
         ';
 
         return $this->setText($text);
@@ -183,14 +183,15 @@ class ApiAction extends AbstractAction {
                 GROUP BY id';
 
             $faces = $faceLoader->loadFromQuery($q);
-            $text = 'Available faces for emotion *' . $emotion . '*\n Total of ' . count($faces);
+            $text = 'Available faces for ' . $emotion . ' : ' . count($faces);
         } else {
             $tagLoader = $this->collection('faces/object/tag');
             $tags = $tagLoader->load();
-            $text = 'Available emotions\n';
+            $text = 'Available emotions : ';
             foreach ($tags as $tag) {
-                $text .= $tag->name() . '\n';
+                $text .= $tag->name() . ', ';
             }
+            $text = trim($text, ', ');
         }
 
         return $this->setText($text);
