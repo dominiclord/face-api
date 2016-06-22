@@ -81,7 +81,6 @@ class ApiAction extends AbstractAction {
 
     private function parse($string)
     {
-
         $firstStringRegex = '/(?<=\>)\b\w*\b|^\w*\b/i';
         preg_match($firstStringRegex, $string, $firstString);
         $command = $firstString[0];
@@ -89,10 +88,13 @@ class ApiAction extends AbstractAction {
         // If command is not found, we want to trigger an emotion
         if (in_array($command, $this->commands)) {
             switch ($command) {
-                case 'list' :
+                case 'help':
+                    $this->listCommands();
+                    break;
+                case 'list':
                     $this->listTags($string);
                     break;
-                case 'create' :
+                case 'create':
                     $this->createFace($string);
                     break;
                 default:
@@ -110,9 +112,19 @@ class ApiAction extends AbstractAction {
         $tagProto = $this->proto('faces/object/tag');
         $faceTable = $faceProto->source()->table();
         $tagTable = $tagProto->source()->table();
-        $keyword = htmlspecialchars_decode($keyword, ENT_QUOTES);
 
-        $this->setEmotion($keyword);
+        // Attempt to extract a [message] following the emotion
+        preg_match('/\[((.)*?)\]/i', $keyword, $text);
+
+        if (!empty($text) && !empty($text[1])) {
+            $keyword = trim(str_replace($text[0], '', $keyword));
+            $keyword = htmlspecialchars_decode($keyword, ENT_QUOTES);
+            $this->setEmotion($text[1]);
+        } else {
+            $this->setEmotion($keyword);
+        }
+
+        $keyword = htmlspecialchars_decode($keyword, ENT_QUOTES);
 
         $keyword = '%'.filter_var($keyword, FILTER_SANITIZE_STRING).'%';
 
@@ -133,7 +145,59 @@ class ApiAction extends AbstractAction {
         return $this;
     }
 
-    private function createFace($string) {
+    private function listCommands()
+    {
+        $text = '
+        Available commands\n
+        `/face help` --> *Outputs only to you a list of commands*\n
+        `/face _emotion_` --> *Sends a face to everyone with the related _emotion_*\n
+        `/face _emotion_ [_Your message here_]` --> *Sends a face to everyone with the related _emotion_ and a customised message to go with it*\n\n
+        `/face list` --> *Outputs only to you a list of available emotions*\n
+        `/face list _emotion_` --> *Outputs only to you a count of faces related to the queried emotion*\n
+        ';
+
+        return $this->setText($text);
+    }
+
+    private function listTags($string)
+    {
+        // Attempt to extract an [emotion] from string
+        preg_match('/\[((.)*?)\]/i', $string, $matchArray);
+
+        if (!empty($matchArray) && !empty($matchArray[1])) {
+            $faceLoader = $this->collection('faces/object/face');
+            $faceProto = $this->proto('faces/object/face');
+            $tagProto = $this->proto('faces/object/tag');
+            $faceTable = $faceProto->source()->table();
+            $tagTable = $tagProto->source()->table();
+            $emotion = trim($matchArray[1]);
+            $keyword = htmlspecialchars_decode($emotion, ENT_QUOTES);
+            $keyword = '%'.filter_var($keyword, FILTER_SANITIZE_STRING).'%';
+
+            $q = '
+                SELECT ' . $faceTable . '.* FROM ' . $tagTable . '
+                LEFT JOIN ' . $faceTable . ' ON FIND_IN_SET(' . $tagTable . '.id , ' . $faceTable . '.tags)
+                WHERE 1 = 1
+                AND (' . $faceTable . '.active = 1)
+                AND (' . $tagTable . '.name LIKE "' . $keyword . '")
+                GROUP BY id';
+
+            $faces = $faceLoader->loadFromQuery($q);
+            $text = 'Available faces for emotion *' . $emotion . '*\n Total of ' . count($faces);
+        } else {
+            $tagLoader = $this->collection('faces/object/tag');
+            $tags = $tagLoader->load();
+            $text = 'Available emotions\n';
+            foreach ($tags as $tag) {
+                $text .= $tag->name() . '\n';
+            }
+        }
+
+        return $this->setText($text);
+    }
+
+    private function createFace($string)
+    {
         // Ex.:
         // $arguments = 'create [happy, sad, Eric](http://domain.com/image.jpg)';
 
@@ -177,8 +241,6 @@ class ApiAction extends AbstractAction {
                 }
 
                 $tagIds[] = $tagModel->id();
-
-
             }
 
             // Try to save the face

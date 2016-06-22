@@ -8,13 +8,7 @@ Query the API with an emotion and a face you shall receive
 - Limit to user IDs
 - Look into not outputting `/face [emotion]` into Slack
 - Output face using filename property
-- Add message to face
-    + ex.: `/face emotion [Your message here]`
-- Help function
-    + ex.: `/face help`
-- List function
-    + ex.: `/face list`
-    + ex.: `/face list [emotion]`
+    + ex.: `preg_match('/^[a-zA-Z0-9]+\.[a-zA-Z]{3,4}$/', $filename)`
 - Submit a new image from slack
     + ex.: `/face create [retard, ta mere, bene](http://lel.jpg)`
         ```
