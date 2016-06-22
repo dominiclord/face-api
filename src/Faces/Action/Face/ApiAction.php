@@ -14,6 +14,15 @@ use \Faces\Action\AbstractAction;
 class ApiAction extends AbstractAction {
 
     /**
+     * Commands are basically a protected namespace
+     */
+    protected $commands = [
+        'create',
+        'list',
+        'help'
+    ];
+
+    /**
      * In memory storage of face collection
      */
     private $faces;
@@ -72,8 +81,26 @@ class ApiAction extends AbstractAction {
 
     private function parse($string)
     {
-        $this->search($string);
-        return $this;
+
+        $firstStringRegex = '/(?<=\>)\b\w*\b|^\w*\b/i';
+        preg_match($firstStringRegex, $string, $firstString);
+        $command = $firstString[0];
+
+        // If command is not found, we want to trigger an emotion
+        if (in_array($command, $this->commands)) {
+            switch ($command) {
+                case 'list' :
+                    $this->listTags($string);
+                    break;
+                case 'create' :
+                    $this->createFace($string);
+                    break;
+                default:
+                    $this->search($string);
+            }
+        } else {
+            $this->search($string);
+        }
     }
 
     private function search($keyword)
@@ -104,6 +131,98 @@ class ApiAction extends AbstractAction {
             ->convertFacesToSlackAttachments();
 
         return $this;
+    }
+
+    private function createFace($string) {
+        // Ex.:
+        // $arguments = 'create [happy, sad, Eric](http://domain.com/image.jpg)';
+
+        // Basic regex
+        $tagsRegex = '/\[((.)*?)\]/i';
+        $urlRegex = '/\(((.)*?)\)/i';
+
+        // Match all
+        preg_match($tagsRegex, $string, $tagArray);
+        preg_match($urlRegex, $string, $url);
+
+        if (!empty($tagArray) && !empty($tagArray[1])) {
+            // Returns an array of tags.
+            $tagArray = $tagArray[1];
+            $tagArray = explode(',', $tagArray);
+            array_walk($tagArray, function (&$arg){
+                $arg = trim($arg);
+            });
+        }
+
+        // The image if the first match
+        $imageUrl = (!empty($url[1])) ? $url[1] : '';
+
+        if (!empty($tagArray) && !empty($imageUrl)) {
+            $tagIds = [];
+            // Try to load the tags
+            foreach ($tagArray as $tagString) {
+                // Here we test for existing category by name
+                $tagModel = $this
+                    ->obj('faces/object/tag')
+                    ->loadFrom('name', $tagString);
+
+                if (!$tagModel->id()) {
+                    $tagModel = $this
+                        ->obj('faces/object/tag')
+                        ->setData([
+                            'name' => $tagString
+                        ]);
+
+                    $tagModel->save();
+                }
+
+                $tagIds[] = $tagModel->id();
+
+
+            }
+
+            // Try to save the face
+            $faceModel = $this->obj('faces/object/face');
+
+            // Start by faking a file upload
+            $tempName = ini_get('upload_tmp_dir') . '/php' . uniqid();
+            var_dump($tempName);
+            $tempName = tempnam($faceModel->p('image')->uploadPath(), 'php_files');
+            var_dump($tempName);
+
+            $originalName = basename(parse_url($imageUrl, PHP_URL_PATH));
+            $imgRawData = file_get_contents($imageUrl);
+
+            // @todo Test for size
+            $uploadMaxFilesize = ini_get('upload_max_filesize');
+
+            file_put_contents($tempName, $imgRawData);
+
+            $_FILES['image'] = [
+                'name' => $originalName, // @todo Could be changed to custom filename
+                'type' => mime_content_type($tempName),
+                'tmp_name' => $tempName,
+                'error' => 0,
+                'size' => strlen($imgRawData)
+            ];
+
+            // Create and save the model
+            $faceModel->setData([
+                'active' => true,
+                'filename' => $originalName,
+                'tags' => $tagIds
+            ]);
+
+            $faceModel->save();
+
+            unlink($tempName);
+
+            die();
+        } else {
+            $this
+                ->setResponseType('ephemeral')
+                ->setText('Something went wrong with your command');
+        }
     }
 
     /**
